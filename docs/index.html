@@ -8,114 +8,306 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-180.png">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="모닝뉴스">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap">
 <style>
 :root {
-  --bg: #f6f7f9; --card: #fff; --text: #1a1d23; --muted: #6b7280; --line: #e5e7eb;
-  --accent: #0f766e; --accent-soft: #e6f4f1;
+  --bg: #fff; --text: #111; --muted: #757575; --soft: #f5f5f5; --line: #e5e5e5;
+  --inv-bg: #111; --inv-text: #fff;
+  --tab-h: 64px;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #111418; --card: #1a1e24; --text: #e8eaed; --muted: #9aa3ad; --line: #2a3038;
-          --accent: #5eead4; --accent-soft: #15302d; }
+  :root { --bg: #000; --text: #fff; --muted: #9e9e9e; --soft: #1c1c1c; --line: #262626;
+          --inv-bg: #fff; --inv-text: #111; }
 }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text);
-  font-family: Pretendard, -apple-system, "Malgun Gothic", sans-serif; line-height: 1.5; }
-.wrap { max-width: 760px; margin: 0 auto;
-  padding: calc(24px + env(safe-area-inset-top)) 16px calc(64px + env(safe-area-inset-bottom)); }
-.reload { margin-left: auto; font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; }
-header h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
-header p { margin: 0; color: var(--muted); font-size: 14px; }
-.bar { display: flex; gap: 8px; align-items: center; margin: 20px 0 12px; flex-wrap: wrap; }
-select { font: inherit; font-size: 14px; padding: 6px 10px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--card); color: var(--text); }
-.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
-.tabs button { flex: none; font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; }
-.tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
-section h2 { font-size: 16px; margin: 28px 0 10px; color: var(--accent); }
-ol { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
-li + li { border-top: 1px solid var(--line); }
-li a { display: block; padding: 13px 16px; color: inherit; text-decoration: none; }
-li a:hover { background: var(--accent-soft); }
-li a:visited .t { color: var(--muted); }
-.t { font-size: 15.5px; font-weight: 500; }
-.m { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
-.empty { color: var(--muted); padding: 40px 0; text-align: center; }
-footer { margin-top: 40px; font-size: 12px; color: var(--muted); text-align: center; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body { font-family: Pretendard, -apple-system, "Malgun Gothic", sans-serif; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+.app { max-width: 640px; margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) 0 calc(var(--tab-h) + 32px + env(safe-area-inset-bottom)); }
+.pad { padding: 0 20px; }
+
+/* 헤더 */
+.eyebrow { font-family: Oswald, sans-serif; font-weight: 500; font-size: 13px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+h1 { font-size: 40px; font-weight: 900; letter-spacing: -0.045em; line-height: 1.05; margin: 0; }
+.meta-line { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--soft);
+  display: grid; place-items: center; flex: none; margin-top: 6px; }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn.spin svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 섹션 타이틀 */
+.sec-title { display: flex; align-items: baseline; justify-content: space-between; margin: 36px 0 14px; }
+.sec-title h2 { font-size: 24px; font-weight: 900; letter-spacing: -0.04em; margin: 0; }
+.sec-title span { font-size: 14px; color: var(--muted); font-weight: 600; }
+
+/* 탑 스토리 캐러셀 */
+.carousel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 20px; scroll-padding: 0 20px; scrollbar-width: none; }
+.carousel::-webkit-scrollbar { display: none; }
+.hero { position: relative; flex: none; width: 84%; max-width: 420px; aspect-ratio: 5 / 6;
+  border-radius: 14px; overflow: hidden; scroll-snap-align: start; color: #fff;
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; }
+.hero::before { content: attr(data-word); position: absolute; top: -8px; left: -6px; right: -6px;
+  font-family: Oswald, sans-serif; font-weight: 700; font-size: 150px; line-height: .82; white-space: nowrap;
+  text-transform: uppercase; letter-spacing: -.02em; color: rgba(255,255,255,.1); }
+.hero::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); }
+.hero > * { position: relative; z-index: 1; }
+.chip { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px;
+  background: #fff; color: #111; margin-bottom: 14px; }
+.hero h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.25; margin: 0 0 12px;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.hero .src { font-size: 13px; opacity: .75; }
+
+/* 카테고리 필 */
+.pills { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px; margin-top: 32px; scrollbar-width: none;
+  position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: 10px; }
+.pills::-webkit-scrollbar { display: none; }
+.pill { flex: none; font-size: 15px; font-weight: 600; padding: 9px 18px; border-radius: 999px;
+  background: var(--soft); transition: background .15s, color .15s; }
+.pill[aria-pressed="true"] { background: var(--inv-bg); color: var(--inv-text); }
+
+/* 기사 리스트 */
+.list { list-style: none; margin: 0; padding: 0; }
+.row { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.row .num { font-family: Oswald, sans-serif; font-weight: 700; font-size: 20px; line-height: 1.3;
+  width: 26px; flex: none; color: var(--muted); }
+.row a { flex: 1; min-width: 0; }
+.row .t { font-size: 16.5px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.4; }
+.row a:visited .t { color: var(--muted); }
+.row .m { font-size: 13px; color: var(--muted); margin-top: 5px; }
+.save { width: 36px; height: 36px; flex: none; display: grid; place-items: center; margin: -4px -8px 0 0; }
+.save svg { width: 20px; height: 20px; }
+.save[aria-pressed="true"] svg { fill: currentColor; }
+
+/* 지난 뉴스 */
+.day-row { display: flex; align-items: center; gap: 16px; width: 100%; text-align: left;
+  padding: 18px 0; border-bottom: 1px solid var(--line); }
+.day-row .d { font-family: Oswald, sans-serif; font-weight: 700; font-size: 34px; line-height: 1; width: 64px; }
+.day-row .w { flex: 1; }
+.day-row .w b { display: block; font-size: 17px; letter-spacing: -0.02em; }
+.day-row .w span { font-size: 13px; color: var(--muted); }
+.day-row .go { color: var(--muted); font-size: 22px; }
+
+.empty { text-align: center; color: var(--muted); padding: 64px 20px; font-size: 15px; }
+.empty b { display: block; color: var(--text); font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.back { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700;
+  padding: 7px 14px; border-radius: 999px; background: var(--soft); margin-top: 14px; }
+
+/* 하단 탭바 */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--bg);
+  border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.tabbar .inner { max-width: 640px; margin: 0 auto; display: flex; height: var(--tab-h); }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: 11px; font-weight: 600; color: var(--muted); }
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-current="true"] { color: var(--text); }
+footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 40px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🩺 간호·의료 모닝뉴스</h1>
-    <p id="sub">불러오는 중…</p>
-  </header>
-  <div class="bar"><select id="day" aria-label="날짜 선택"></select><button class="reload" id="reload">새로고침</button></div>
-  <nav class="tabs" id="tabs"></nav>
-  <main id="list"></main>
-  <footer>매일 오전 7시(KST) 자동 갱신 · 출처: Google 뉴스</footer>
-</div>
-<script>
-const $ = (id) => document.getElementById(id);
-let days = [], tab = 'all';
+<div class="app" id="app"></div>
 
-const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+<nav class="tabbar"><div class="inner">
+  <button class="tab" data-view="today">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>오늘</button>
+  <button class="tab" data-view="archive">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>지난 뉴스</button>
+  <button class="tab" data-view="saved">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>저장</button>
+</div></nav>
+
+<script>
+const WORDS = { nursing: 'Nursing', policy: 'Policy', hospital: 'Hospital', tech: 'Health Tech' };
+const COLORS = { nursing: '#111111', policy: '#24364a', hospital: '#4a2a24', tech: '#2c2a4a' };
+const BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>';
+const REFRESH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>';
+
+const app = document.getElementById('app');
+const state = { days: [], view: 'today', dayIdx: 0, cat: 'all', loading: true, error: false };
+
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem('saved') || '[]'); } catch { return []; } },
+  set(v) { try { localStorage.setItem('saved', JSON.stringify(v)); } catch {} },
+};
+let saved = store.get();
+const isSaved = (link) => saved.some((s) => s.link === link);
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ago = (iso) => {
   const h = Math.floor((Date.now() - new Date(iso)) / 3600e3);
   if (h < 1) return '방금';
   if (h < 24) return `${h}시간 전`;
   return new Date(iso).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
 };
-const weekday = (d) => new Date(d + 'T00:00:00+09:00').toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+const kdate = (d) => new Date(d + 'T00:00:00+09:00');
+const eyebrow = (d) => kdate(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).replace(',', ' ·');
+const longDate = (d) => kdate(d).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+const count = (day) => day.categories.reduce((n, c) => n + c.items.length, 0);
+
+const row = (it, i) => `
+  <li class="row">
+    <div class="num">${String(i + 1).padStart(2, '0')}</div>
+    <a href="${esc(it.link)}" target="_blank" rel="noopener">
+      <div class="t">${esc(it.title)}</div>
+      <div class="m">${esc(it.source)} · ${ago(it.published)}</div>
+    </a>
+    <button class="save" data-link="${esc(it.link)}" aria-pressed="${isSaved(it.link)}" aria-label="저장">${BOOKMARK}</button>
+  </li>`;
+
+function viewToday() {
+  if (state.loading) return `<div class="pad"><p class="eyebrow">Loading</p><h1>오늘의 뉴스</h1><p class="meta-line">불러오는 중…</p></div>`;
+  if (state.error || !state.days.length)
+    return `<div class="pad"><h1>오늘의 뉴스</h1></div><div class="empty"><b>뉴스를 불러오지 못했어요</b>잠시 후 새로고침해 주세요.</div>`;
+
+  const day = state.days[state.dayIdx];
+  const latest = state.dayIdx === 0;
+  const heroes = day.categories.filter((c) => c.items.length).map((c) => ({ ...c.items[0], cat: c }));
+  const cats = day.categories.filter((c) => state.cat === 'all' || c.id === state.cat);
+  const updated = new Date(day.updatedAt).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+
+  return `
+    <div class="pad top-row">
+      <div>
+        <p class="eyebrow">${eyebrow(day.date)}</p>
+        <h1>${latest ? '오늘의 뉴스' : longDate(day.date).replace(/ \S+요일$/, '')}</h1>
+        <p class="meta-line">기사 ${count(day)}건 · ${updated} 업데이트</p>
+        ${latest ? '' : '<button class="back" data-action="latest">← 최신 뉴스로</button>'}
+      </div>
+      <button class="icon-btn" data-action="reload" aria-label="새로고침">${REFRESH}</button>
+    </div>
+
+    <div class="pad sec-title"><h2>주요 뉴스</h2><span>밀어서 보기 →</span></div>
+    <div class="carousel">
+      ${heroes.map((h) => `
+        <a class="hero" href="${esc(h.link)}" target="_blank" rel="noopener"
+           data-word="${WORDS[h.cat.id] || h.cat.name}" style="background:${COLORS[h.cat.id] || '#111'}">
+          <span class="chip">${esc(h.cat.name)}</span>
+          <h3>${esc(h.title)}</h3>
+          <span class="src">${esc(h.source)} · ${ago(h.published)}</span>
+        </a>`).join('')}
+    </div>
+
+    <div class="pills">
+      ${[{ id: 'all', name: '전체' }, ...day.categories].map((c) =>
+        `<button class="pill" data-cat="${c.id}" aria-pressed="${state.cat === c.id}">${c.name}</button>`).join('')}
+    </div>
+
+    <div class="pad">
+      ${cats.map((c) => `
+        <div class="sec-title"><h2>${c.name}</h2><span>${c.items.length}건</span></div>
+        ${c.items.length ? `<ul class="list">${c.items.map(row).join('')}</ul>` : '<div class="empty">기사가 없어요</div>'}
+      `).join('')}
+      <footer>매일 오전 7시 업데이트 · 출처 Google 뉴스</footer>
+    </div>`;
+}
+
+function viewArchive() {
+  return `
+    <div class="pad">
+      <p class="eyebrow">Archive</p>
+      <h1>지난 뉴스</h1>
+      <p class="meta-line">최근 ${state.days.length}일치 뉴스를 볼 수 있어요</p>
+      <div style="margin-top:20px">
+        ${state.days.map((d, i) => `
+          <button class="day-row" data-day="${i}">
+            <span class="d">${kdate(d.date).getDate()}</span>
+            <span class="w"><b>${longDate(d.date)}${i === 0 ? ' · 최신' : ''}</b><span>기사 ${count(d)}건</span></span>
+            <span class="go">›</span>
+          </button>`).join('') || '<div class="empty">아직 지난 뉴스가 없어요</div>'}
+      </div>
+    </div>`;
+}
+
+function viewSaved() {
+  return `
+    <div class="pad">
+      <p class="eyebrow">Saved</p>
+      <h1>저장한 기사</h1>
+      <p class="meta-line">나중에 읽을 기사를 모아두는 곳이에요</p>
+      ${saved.length
+        ? `<ul class="list" style="margin-top:16px">${saved.map(row).join('')}</ul>`
+        : `<div class="empty"><b>아직 저장한 기사가 없어요</b>기사 오른쪽 책갈피를 눌러 저장해 보세요.</div>`}
+    </div>`;
+}
 
 function render() {
-  const day = days.find((d) => d.date === $('day').value);
-  if (!day) return;
-  const total = day.categories.reduce((n, c) => n + c.items.length, 0);
-  $('sub').textContent = `${weekday(day.date)} · 기사 ${total}건 · ${new Date(day.updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 갱신`;
-  $('tabs').innerHTML = [{ id: 'all', name: '전체' }, ...day.categories]
-    .map((c) => `<button data-id="${c.id}" aria-pressed="${c.id === tab}">${c.name}${c.items ? ` ${c.items.length}` : ''}</button>`).join('');
-  const cats = day.categories.filter((c) => tab === 'all' || c.id === tab);
-  $('list').innerHTML = cats.map((c) => `
-    <section>${tab === 'all' ? `<h2>${c.name}</h2>` : ''}
-      ${c.items.length ? `<ol>${c.items.map((it) => `
-        <li><a href="${esc(it.link)}" target="_blank" rel="noopener">
-          <div class="t">${esc(it.title)}</div>
-          <div class="m">${esc(it.source)} · ${ago(it.published)}</div>
-        </a></li>`).join('')}</ol>` : '<p class="empty">기사가 없습니다.</p>'}
-    </section>`).join('');
+  app.innerHTML = { today: viewToday, archive: viewArchive, saved: viewSaved }[state.view]();
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-current', t.dataset.view === state.view));
 }
 
-$('tabs').addEventListener('click', (e) => {
-  const b = e.target.closest('button');
-  if (!b) return;
-  tab = b.dataset.id;
+function go(view) {
+  state.view = view;
   render();
+  window.scrollTo(0, 0);
+}
+
+function findItem(link) {
+  for (const d of state.days) for (const c of d.categories) for (const it of c.items) if (it.link === link) return it;
+  return saved.find((s) => s.link === link);
+}
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('button');
+  if (!el) return;
+  if (el.dataset.view) {
+    if (el.dataset.view === 'today' && state.view === 'today') state.dayIdx = 0;
+    go(el.dataset.view);
+  } else if (el.dataset.cat) {
+    state.cat = el.dataset.cat;
+    const y = window.scrollY;
+    render();
+    window.scrollTo(0, y);
+  } else if (el.dataset.day) {
+    state.dayIdx = +el.dataset.day;
+    state.cat = 'all';
+    go('today');
+  } else if (el.dataset.link) {
+    const link = el.dataset.link;
+    saved = isSaved(link) ? saved.filter((s) => s.link !== link) : [findItem(link), ...saved].filter(Boolean);
+    store.set(saved);
+    if (state.view === 'saved') { const y = window.scrollY; render(); window.scrollTo(0, y); }
+    else el.setAttribute('aria-pressed', isSaved(link));
+  } else if (el.dataset.action === 'reload') {
+    el.classList.add('spin');
+    load();
+  } else if (el.dataset.action === 'latest') {
+    state.dayIdx = 0;
+    go('today');
+  }
 });
-$('day').addEventListener('change', render);
 
 function load() {
-  $('sub').textContent = '불러오는 중…';
   return fetch('/news.json')
     .then((r) => r.json())
-    .then((data) => {
-      days = data.days;
-      if (!days.length) { $('sub').textContent = '아직 수집된 뉴스가 없습니다.'; return; }
-      $('day').innerHTML = days.map((d, i) => `<option value="${d.date}">${weekday(d.date)}${i === 0 ? ' (최신)' : ''}</option>`).join('');
+    .then((data) => { state.days = data.days || []; state.error = false; })
+    .catch(() => { state.error = !state.days.length; })
+    .finally(() => {
+      state.loading = false;
+      if (state.dayIdx >= state.days.length) state.dayIdx = 0;
+      const y = window.scrollY;
       render();
-    })
-    .catch(() => { $('sub').textContent = '뉴스를 불러오지 못했습니다.'; });
+      window.scrollTo(0, y);
+    });
 }
-$('reload').addEventListener('click', load);
+
 // 앱을 백그라운드에 두었다가 다시 열면 최신 뉴스로 갱신
 document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+render();
 load();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');

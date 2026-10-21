@@ -1,5 +1,5 @@
 // 네트워크 우선, 실패하면 마지막으로 받은 내용을 보여준다(지하철 등 오프라인 대비).
-const CACHE = 'morning-news-v1';
+const CACHE = 'morning-news-v2';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/manifest.webmanifest', '/icons/icon-192.png'])));
