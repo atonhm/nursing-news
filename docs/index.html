@@ -294,7 +294,7 @@ function viewToday() {
           const open = state.expanded.has(c.id);
           const items = open ? c.items : c.items.slice(0, PREVIEW);
           return `
-          <section class="box${state.cat === c.id ? ' active' : ''}">
+          <section class="box${state.cat === c.id ? ' active' : ''}" data-cat="${c.id}">
             <div class="sec-title"><h2>${c.name}</h2><span>${c.items.length}건</span></div>
             ${c.items.length ? `<ul class="list">${items.map(row).join('')}</ul>` : '<div class="empty">기사가 없어요</div>'}
             ${c.items.length > PREVIEW
@@ -338,6 +338,10 @@ function moveHero(step) {
   if (!day) return;
   state.hero += step;
   document.getElementById('stage').innerHTML = stageHTML(day);
+  // 카드에 맞춰 아래 분야 버튼·기사 목록도 바꾼다 (휴대폰)
+  state.cat = heroesOf(day)[state.hero]?.cat.id ?? state.cat;
+  document.querySelectorAll('.pill').forEach((p) => p.setAttribute('aria-pressed', p.dataset.cat === state.cat));
+  document.querySelectorAll('.box').forEach((b) => b.classList.toggle('active', b.dataset.cat === state.cat));
 }
 
 function viewArchive() {
@@ -548,6 +552,9 @@ document.addEventListener('click', (e) => {
     go(el.dataset.view);
   } else if (el.dataset.cat) {
     state.cat = el.dataset.cat;
+    // 주요 뉴스 카드도 선택한 분야의 대표 기사로
+    const i = heroesOf(state.days[state.dayIdx]).findIndex((h) => h.cat.id === state.cat);
+    if (i >= 0) state.hero = i;
     const y = window.scrollY;
     render();
     window.scrollTo(0, y);
