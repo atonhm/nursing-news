@@ -35,7 +35,9 @@ a { color: inherit; text-decoration: none; }
 
 .app { max-width: 640px; margin: 0 auto;
   padding: calc(20px + env(safe-area-inset-top)) 0 calc(var(--tab-h) + 32px + env(safe-area-inset-bottom)); }
+.app.wide { max-width: 1120px; }
 .pad { padding: 0 20px; }
+@media (min-width: 900px) { .pad { padding: 0 32px; } .app { padding-top: 36px; } }
 
 /* 헤더 */
 .eyebrow { font-family: Oswald, sans-serif; font-weight: 500; font-size: 13px; letter-spacing: .12em;
@@ -54,13 +56,26 @@ h1 { font-size: 40px; font-weight: 900; letter-spacing: -0.045em; line-height: 1
 .sec-title h2 { font-size: 24px; font-weight: 900; letter-spacing: -0.04em; margin: 0; }
 .sec-title span { font-size: 14px; color: var(--muted); font-weight: 600; }
 
-/* 탑 스토리 캐러셀 */
-.carousel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0 20px; scroll-padding: 0 20px; scrollbar-width: none; }
-.carousel::-webkit-scrollbar { display: none; }
-.hero { position: relative; flex: none; width: 84%; max-width: 420px; aspect-ratio: 5 / 6;
-  border-radius: 14px; overflow: hidden; scroll-snap-align: start; color: #fff;
-  display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; }
+/* 주요 뉴스: 한 장씩 화살표로 넘김 */
+.stage { position: relative; }
+.hero { position: relative; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden; color: #fff;
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 22px 22px 84px;
+  animation: fade .35s ease; }
+@keyframes fade { from { opacity: .3; } }
+@media (min-width: 900px) {
+  .hero { aspect-ratio: 21 / 8; padding: 36px 40px 40px; }
+  .hero h3 { font-size: 34px !important; max-width: 70%; -webkit-line-clamp: 3 !important; }
+}
+.stage-nav { position: absolute; right: 18px; bottom: 18px; z-index: 2; display: flex; align-items: center; gap: 8px; }
+@media (min-width: 900px) { .stage-nav { right: 32px; bottom: 36px; } }
+.stage-nav .count { font-family: Oswald, sans-serif; font-weight: 500; font-size: 15px; color: #fff;
+  letter-spacing: .06em; margin-right: 6px; }
+.stage-nav .count b { font-weight: 700; }
+.arrow { width: 46px; height: 46px; border-radius: 50%; background: #fff; color: #111;
+  display: grid; place-items: center; transition: transform .15s; }
+.arrow:active { transform: scale(.92); }
+.arrow:disabled { opacity: .35; cursor: default; }
+.arrow svg { width: 20px; height: 20px; }
 .hero::before { content: attr(data-word); position: absolute; top: -8px; left: -6px; right: -6px;
   font-family: Oswald, sans-serif; font-weight: 700; font-size: 150px; line-height: .82; white-space: nowrap;
   text-transform: uppercase; letter-spacing: -.02em; color: rgba(255,255,255,.1); }
@@ -77,8 +92,9 @@ h1 { font-size: 40px; font-weight: 900; letter-spacing: -0.045em; line-height: 1
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; max-width: 640px; margin: 0 auto;
   max-height: 88vh; overflow-y: auto; overscroll-behavior: contain; background: var(--bg);
   border-radius: 20px 20px 0 0; padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
-  transform: translateY(105%); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
-.sheet.open { transform: none; }
+  transform: translateY(105%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s .3s; }
+.sheet.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
 .sheet.dragging { transition: none; }
 .handle { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 16px; }
 .sheet-img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; background: var(--soft);
@@ -99,8 +115,9 @@ h1 { font-size: 40px; font-weight: 900; letter-spacing: -0.045em; line-height: 1
 
 /* 앱 안에서 기사 읽기 */
 .reader { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column;
-  transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
-.reader.open { transform: none; }
+  transform: translateY(100%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s .3s; }
+.reader.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
 .reader-bar { display: flex; align-items: center; gap: 8px; padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
   border-bottom: 1px solid var(--line); }
 .reader-bar b { flex: 1; text-align: center; font-size: 15px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -118,12 +135,30 @@ h1 { font-size: 40px; font-weight: 900; letter-spacing: -0.045em; line-height: 1
 .hero .src { font-size: 13px; opacity: .75; }
 
 /* 카테고리 필 */
-.pills { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px; margin-top: 32px; scrollbar-width: none;
-  position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: 10px; }
+.pills { display: flex; gap: 8px; overflow-x: auto; margin: 36px -20px 4px; padding: 0 20px; scrollbar-width: none; }
 .pills::-webkit-scrollbar { display: none; }
 .pill { flex: none; font-size: 15px; font-weight: 600; padding: 9px 18px; border-radius: 999px;
   background: var(--soft); transition: background .15s, color .15s; }
 .pill[aria-pressed="true"] { background: var(--inv-bg); color: var(--inv-text); }
+
+/* 분야별 보드: 휴대폰은 선택한 분야 하나, PC는 2×2 */
+.board { display: grid; gap: 0; }
+.box { display: none; }
+.box.active { display: block; }
+.box .sec-title { margin-top: 18px; }
+.more { width: 100%; margin-top: 12px; height: 46px; border-radius: 999px; border: 1px solid var(--line);
+  font-size: 14px; font-weight: 700; }
+@media (min-width: 900px) {
+  .pills { display: none; }
+  .board { grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
+  .box { display: block; background: var(--soft); border-radius: 16px; padding: 6px 24px 20px; }
+  .box .sec-title { margin: 18px 0 4px; }
+  .box .row { padding: 13px 0; }
+  .box .row:last-child { border-bottom: 0; }
+  .box .row .t { font-size: 15.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .box .row .num { font-size: 17px; }
+  .more { background: var(--bg); border: 0; }
+}
 
 /* 기사 리스트 */
 .list { list-style: none; margin: 0; padding: 0; }
@@ -194,7 +229,7 @@ const BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const REFRESH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>';
 
 const app = document.getElementById('app');
-const state = { days: [], view: 'today', dayIdx: 0, cat: 'all', loading: true, error: false };
+const state = { days: [], view: 'today', dayIdx: 0, cat: null, hero: 0, expanded: new Set(), loading: true, error: false };
 
 const store = {
   get() { try { return JSON.parse(localStorage.getItem('saved') || '[]'); } catch { return []; } },
@@ -232,8 +267,7 @@ function viewToday() {
 
   const day = state.days[state.dayIdx];
   const latest = state.dayIdx === 0;
-  const heroes = day.categories.filter((c) => c.items.length).map((c) => ({ ...c.items[0], cat: c }));
-  const cats = day.categories.filter((c) => state.cat === 'all' || c.id === state.cat);
+  if (!day.categories.some((c) => c.id === state.cat)) state.cat = day.categories[0]?.id;
   const updated = new Date(day.updatedAt).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
 
   return `
@@ -247,30 +281,63 @@ function viewToday() {
       <button class="icon-btn" data-action="reload" aria-label="새로고침">${REFRESH}</button>
     </div>
 
-    <div class="pad sec-title"><h2>주요 뉴스</h2><span>밀어서 보기 →</span></div>
-    <div class="carousel">
-      ${heroes.map((h) => `
-        <a class="hero${h.image ? ' photo' : ''}" href="${esc(h.link)}" target="_blank" rel="noopener" data-open="${esc(h.link)}"
-           data-word="${WORDS[h.cat.id] || h.cat.name}"
-           style="background:${h.image ? `#111 url('${esc(h.image).replace(/'/g, '%27')}')` : COLORS[h.cat.id] || '#111'}">
-          <span class="chip">${esc(h.cat.name)}</span>
-          <h3>${esc(h.title)}</h3>
-          <span class="src">${esc(h.source)} · ${ago(h.published)}</span>
-        </a>`).join('')}
-    </div>
-
-    <div class="pills">
-      ${[{ id: 'all', name: '전체' }, ...day.categories].map((c) =>
-        `<button class="pill" data-cat="${c.id}" aria-pressed="${state.cat === c.id}">${c.name}</button>`).join('')}
-    </div>
+    <div class="pad sec-title"><h2>주요 뉴스</h2></div>
+    <div class="pad"><div class="stage" id="stage">${stageHTML(day)}</div></div>
 
     <div class="pad">
-      ${cats.map((c) => `
-        <div class="sec-title"><h2>${c.name}</h2><span>${c.items.length}건</span></div>
-        ${c.items.length ? `<ul class="list">${c.items.map(row).join('')}</ul>` : '<div class="empty">기사가 없어요</div>'}
-      `).join('')}
+      <div class="pills">
+        ${day.categories.map((c) =>
+          `<button class="pill" data-cat="${c.id}" aria-pressed="${state.cat === c.id}">${c.name}</button>`).join('')}
+      </div>
+      <div class="board">
+        ${day.categories.map((c) => {
+          const open = state.expanded.has(c.id);
+          const items = open ? c.items : c.items.slice(0, PREVIEW);
+          return `
+          <section class="box${state.cat === c.id ? ' active' : ''}">
+            <div class="sec-title"><h2>${c.name}</h2><span>${c.items.length}건</span></div>
+            ${c.items.length ? `<ul class="list">${items.map(row).join('')}</ul>` : '<div class="empty">기사가 없어요</div>'}
+            ${c.items.length > PREVIEW
+              ? `<button class="more" data-more="${c.id}">${open ? '접기 ↑' : `${c.items.length - PREVIEW}건 더보기 ↓`}</button>` : ''}
+          </section>`;
+        }).join('')}
+      </div>
       <footer>매일 오전 7시 업데이트 · 출처 Google 뉴스</footer>
     </div>`;
+}
+
+const PREVIEW = 5;
+const ARROW_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+const heroesOf = (day) => day.categories.filter((c) => c.items.length).map((c) => ({ ...c.items[0], cat: c }));
+
+function stageHTML(day) {
+  const heroes = heroesOf(day);
+  if (!heroes.length) return '';
+  state.hero = (state.hero + heroes.length) % heroes.length;
+  const h = heroes[state.hero];
+  const pad = (n) => String(n).padStart(2, '0');
+  return `
+    <a class="hero${h.image ? ' photo' : ''}" href="${esc(h.link)}" target="_blank" rel="noopener" data-open="${esc(h.link)}"
+       data-word="${WORDS[h.cat.id] || h.cat.name}"
+       style="background:${h.image ? `#111 url('${esc(h.image).replace(/'/g, '%27')}')` : COLORS[h.cat.id] || '#111'}">
+      <span class="chip">${esc(h.cat.name)}</span>
+      <h3>${esc(h.title)}</h3>
+      <span class="src">${esc(h.source)} · ${ago(h.published)}</span>
+    </a>
+    ${heroes.length > 1 ? `
+    <div class="stage-nav">
+      <span class="count"><b>${pad(state.hero + 1)}</b> / ${pad(heroes.length)}</span>
+      <button class="arrow" data-action="prev" aria-label="이전 뉴스">${ARROW_L}</button>
+      <button class="arrow" data-action="next" aria-label="다음 뉴스">${ARROW_R}</button>
+    </div>` : ''}`;
+}
+
+function moveHero(step) {
+  const day = state.days[state.dayIdx];
+  if (!day) return;
+  state.hero += step;
+  document.getElementById('stage').innerHTML = stageHTML(day);
 }
 
 function viewArchive() {
@@ -304,6 +371,7 @@ function viewSaved() {
 
 function render() {
   app.innerHTML = { today: viewToday, archive: viewArchive, saved: viewSaved }[state.view]();
+  app.classList.toggle('wide', state.view === 'today');
   document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-current', t.dataset.view === state.view));
 }
 
@@ -419,7 +487,11 @@ function closeTop() {
 window.addEventListener('popstate', closeTop);
 const back = () => (layers ? history.back() : null);
 backdrop.addEventListener('click', back);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') back(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') back();
+  // PC: 키보드 ← → 로 주요 뉴스 넘기기
+  else if (!layers && state.view === 'today' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) moveHero(e.key === 'ArrowLeft' ? -1 : 1);
+});
 
 // 아래로 끌어서 닫기
 let dragY = null;
@@ -459,6 +531,18 @@ document.addEventListener('click', (e) => {
   if (el.dataset.action === 'read') return openReader();
   if (el.dataset.action === 'close') return back();
   if (el.dataset.action === 'share') return share();
+  if (el.dataset.action === 'prev') return moveHero(-1);
+  if (el.dataset.action === 'next') return moveHero(1);
+  if (el.dataset.more) {
+    const id = el.dataset.more;
+    state.expanded.has(id) ? state.expanded.delete(id) : state.expanded.add(id);
+    const y = window.scrollY;
+    render();
+    // 접을 때는 해당 분야 제목으로 돌아가 위치를 잃지 않게
+    if (!state.expanded.has(id)) document.querySelector(`[data-more="${id}"]`)?.closest('.box').scrollIntoView({ block: 'nearest' });
+    else window.scrollTo(0, y);
+    return;
+  }
   if (el.dataset.view) {
     if (el.dataset.view === 'today' && state.view === 'today') state.dayIdx = 0;
     go(el.dataset.view);
@@ -469,7 +553,8 @@ document.addEventListener('click', (e) => {
     window.scrollTo(0, y);
   } else if (el.dataset.day) {
     state.dayIdx = +el.dataset.day;
-    state.cat = 'all';
+    state.hero = 0;
+    state.expanded.clear();
     go('today');
   } else if (el.dataset.link) {
     const link = el.dataset.link;
