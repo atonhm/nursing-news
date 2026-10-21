@@ -2,10 +2,17 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>간호·의료 모닝뉴스</title>
 <meta name="description" content="매일 아침 7시에 갱신되는 간호·의료 뉴스 모음">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="모닝뉴스">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root {
@@ -19,7 +26,10 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text);
   font-family: Pretendard, -apple-system, "Malgun Gothic", sans-serif; line-height: 1.5; }
-.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+.wrap { max-width: 760px; margin: 0 auto;
+  padding: calc(24px + env(safe-area-inset-top)) 16px calc(64px + env(safe-area-inset-bottom)); }
+.reload { margin-left: auto; font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; }
 header h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
 header p { margin: 0; color: var(--muted); font-size: 14px; }
 .bar { display: flex; gap: 8px; align-items: center; margin: 20px 0 12px; flex-wrap: wrap; }
@@ -47,7 +57,7 @@ footer { margin-top: 40px; font-size: 12px; color: var(--muted); text-align: cen
     <h1>🩺 간호·의료 모닝뉴스</h1>
     <p id="sub">불러오는 중…</p>
   </header>
-  <div class="bar"><select id="day" aria-label="날짜 선택"></select></div>
+  <div class="bar"><select id="day" aria-label="날짜 선택"></select><button class="reload" id="reload">새로고침</button></div>
   <nav class="tabs" id="tabs"></nav>
   <main id="list"></main>
   <footer>매일 오전 7시(KST) 자동 갱신 · 출처: Google 뉴스</footer>
@@ -91,14 +101,24 @@ $('tabs').addEventListener('click', (e) => {
 });
 $('day').addEventListener('change', render);
 
-fetch('news.json?t=' + Date.now())
-  .then((r) => r.json())
-  .then((data) => {
-    days = data.days;
-    $('day').innerHTML = days.map((d, i) => `<option value="${d.date}">${weekday(d.date)}${i === 0 ? ' (최신)' : ''}</option>`).join('');
-    render();
-  })
-  .catch(() => { $('sub').textContent = '뉴스를 불러오지 못했습니다.'; });
+function load() {
+  $('sub').textContent = '불러오는 중…';
+  return fetch('/news.json')
+    .then((r) => r.json())
+    .then((data) => {
+      days = data.days;
+      if (!days.length) { $('sub').textContent = '아직 수집된 뉴스가 없습니다.'; return; }
+      $('day').innerHTML = days.map((d, i) => `<option value="${d.date}">${weekday(d.date)}${i === 0 ? ' (최신)' : ''}</option>`).join('');
+      render();
+    })
+    .catch(() => { $('sub').textContent = '뉴스를 불러오지 못했습니다.'; });
+}
+$('reload').addEventListener('click', load);
+// 앱을 백그라운드에 두었다가 다시 열면 최신 뉴스로 갱신
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+load();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
 </body>
 </html>

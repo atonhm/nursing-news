@@ -1,0 +1,15 @@
+{
+  "name": "간호·의료 모닝뉴스",
+  "short_name": "모닝뉴스",
+  "description": "매일 아침 7시에 갱신되는 간호·의료 뉴스 모음",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#0f766e",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

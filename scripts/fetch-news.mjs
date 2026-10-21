@@ -1,7 +1,8 @@
-// 매일 아침 간호·의료 뉴스를 Google 뉴스 RSS에서 모아 docs/news.json 에 저장한다.
-import { readFile, writeFile } from 'node:fs/promises';
+// 간호·의료 뉴스를 Google 뉴스 RSS에서 모아 news.json 에 누적 저장한다.
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const OUT = new URL('../docs/news.json', import.meta.url);
 const KEEP_DAYS = 14;
 const PER_CATEGORY = 15;
 
@@ -11,6 +12,8 @@ const CATEGORIES = [
   { id: 'hospital', name: '병원·현장', queries: ['병원 의료진', '상급종합병원 OR 대학병원', '응급실 OR 중환자실'] },
   { id: 'tech', name: '의료기술·AI', queries: ['의료 AI', '디지털헬스케어 OR 원격의료'] },
 ];
+
+export const kstDate = (d = new Date()) => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10);
 
 const decode = (s) =>
   s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
@@ -38,9 +41,17 @@ async function search(query) {
 // 제목 앞부분이 같은 기사(통신사 전재 등)는 하나만 남긴다.
 const key = (title) => title.replace(/[\s\[\]【】()"'“”‘’·…,.!?]/g, '').slice(0, 22);
 
-async function main() {
+export async function readNews(file) {
+  try {
+    return JSON.parse(await readFile(file, 'utf8'));
+  } catch {
+    return { days: [] };
+  }
+}
+
+export async function updateNews(file) {
   const now = new Date();
-  const date = new Date(now.getTime() + 9 * 3600e3).toISOString().slice(0, 10); // KST 날짜
+  const date = kstDate(now);
   const seen = new Set();
   const categories = [];
 
@@ -58,18 +69,23 @@ async function main() {
       })
       .slice(0, PER_CATEGORY);
     categories.push({ id: cat.id, name: cat.name, items });
-    console.log(`${cat.name}: ${items.length}건`);
   }
+  const total = categories.reduce((n, c) => n + c.items.length, 0);
+  if (!total) throw new Error('기사를 하나도 가져오지 못했습니다');
+  console.log(`${date} 뉴스 ${total}건 수집`);
 
-  let days = [];
-  try {
-    days = JSON.parse(await readFile(OUT, 'utf8')).days ?? [];
-  } catch {}
-  days = [{ date, updatedAt: now.toISOString(), categories }, ...days.filter((d) => d.date !== date)].slice(0, KEEP_DAYS);
-  await writeFile(OUT, JSON.stringify({ days }, null, 1));
+  const { days } = await readNews(file);
+  const data = {
+    days: [{ date, updatedAt: now.toISOString(), categories }, ...days.filter((d) => d.date !== date)].slice(0, KEEP_DAYS),
+  };
+  await mkdir(dirname(file), { recursive: true });
+  await writeFile(file, JSON.stringify(data));
+  return data;
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  updateNews(fileURLToPath(new URL('../data/news.json', import.meta.url))).catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

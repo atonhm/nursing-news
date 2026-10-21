@@ -1,0 +1,10 @@
+{
+  "name": "nursing-news",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "fetch": "node scripts/fetch-news.mjs"
+  }
+}
